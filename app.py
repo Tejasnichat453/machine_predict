@@ -31,7 +31,7 @@ def set_background_image(image_path):
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Set your local image path here
-set_background_image('download (4)')
+set_background_image('new image')
 
 # Add animated text
 def add_text_animation():
