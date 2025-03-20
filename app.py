@@ -30,84 +30,48 @@ def set_background_image(image_path):
     '''
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
-# Set your local image path here
 set_background_image('new image.jpg')  # Update this line with the correct file name
 
-# Add animated text
+# Add animated title
+def add_title_animation():
+    title_html = '''
+    <style>
+    @keyframes glow {
+        0% { text-shadow: 0 0 5px #FF5733, 0 0 10px #FF5733; }
+        50% { text-shadow: 0 0 20px #FFBD33, 0 0 30px #FFBD33; }
+        100% { text-shadow: 0 0 5px #FF5733, 0 0 10px #FF5733; }
+    }
+    .title-text {
+        font-size: 3.5em;
+        font-weight: bold;
+        text-align: center;
+        color: #FFBD33;
+        animation: glow 2s infinite alternate;
+    }
+    </style>
+    <div class="title-text">Downtime Prediction</div>
+    '''
+    st.markdown(title_html, unsafe_allow_html=True)
+
+# Add animated welcome text
 def add_text_animation():
     animated_text = '''
     <style>
-    @keyframes slide-fade-in {{
-        0% {{
-            opacity: 0;
-            transform: translateX(-100%);
-        }}
-        100% {{
-            opacity: 1;
-            transform: translateX(0);
-        }}
-    }}
-    @keyframes pulse {{
-        0% {{
-            transform: scale(1);
-            opacity: 1;
-        }}
-        50% {{
-            transform: scale(1.1);
-            opacity: 0.7;
-        }}
-        100% {{
-            transform: scale(1);
-            opacity: 1;
-        }}
-    }}
-    .welcome-text {{
-        font-size: 3.5em;  /* Increased font size */
+    @keyframes slide-fade-in {
+        0% { opacity: 0; transform: translateX(-100%); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+    .welcome-text {
+        font-size: 2.5em;
         font-weight: bold;
-        color: #FFFFFF;
+        color: #FFBD33;
         animation: slide-fade-in 2s ease-in-out;
         text-shadow: 2px 2px 4px #000000;
-    }}
-    .downtime-text {{
-        font-size: 3.5em;  /* Increased font size */
-        font-weight: bold;
-        color: #FF5733;  /* Changed color to orange */
-        animation: pulse 2s infinite;
-        text-shadow: 2px 2px 4px #000000;
-    }}
+    }
     </style>
-
-    <div class="welcome-text">
-        Welcome to <span class="downtime-text">Downtime Prediction</span> App!
-    </div>
+    <div class="welcome-text">Welcome to the <span style="color:#FF5733;">Downtime Prediction</span> App!</div>
     '''
     st.markdown(animated_text, unsafe_allow_html=True)
-
-# Add a spinning gear animation
-def add_gear_animation():
-    gear_animation = '''
-    <style>
-    @keyframes spin {{
-        0% {{
-            transform: rotate(0deg);
-        }}
-        100% {{
-            transform: rotate(360deg);
-        }}
-    }}
-    .gear {{
-        display: inline-block;
-        font-size: 3em;
-        animation: spin 2s linear infinite;
-        color: #FF5733;
-    }}
-    </style>
-
-    <div class="gear">
-        ⚙️
-    </div>
-    '''
-    st.markdown(gear_animation, unsafe_allow_html=True)
 
 # Add a loading spinner
 def show_loading_spinner():
@@ -116,80 +80,43 @@ def show_loading_spinner():
 
 # Preprocess data
 def preprocess_data(data):
-    """
-    Preprocess the input data using the saved preprocessor.
-    """
-    # Drop unnecessary columns
     data = data.drop(['Assembly_Line_No', 'Date', 'Machine_ID'], axis=1, errors='ignore')
-    
-    # Apply the preprocessor
     processed_data = preprocessor.transform(data)
     return processed_data
 
 # Predict downtime
 def predict(data, user=None, pw=None, db=None):
-    """
-    Predict downtime based on the input data and optionally save results to a MySQL database.
-    """
     try:
-        # Preprocess the data
         processed_data = preprocess_data(data)
-
-        # Show loading spinner
         show_loading_spinner()
-
-        # Predict using the model
         predictions = pd.DataFrame(model.predict(processed_data), columns=['Downtime'])
-
-        # Combine predictions with the original data
         final = pd.concat([predictions, data.drop('Downtime', axis=1, errors='ignore')], axis=1)
-
         if user and pw and db:
-            # Create database connection
             engine = create_engine(f"mysql+pymysql://{user}:{pw}@localhost/{db}")
-
-            # Save to database
             final.to_sql('Mc_DT', con=engine, if_exists='replace', chunksize=200, index=False)
             return final, "Results have been saved to the database."
         else:
             return final, "Results are ready. Database credentials were not provided."
-
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return pd.DataFrame(), "Error occurred during processing."
 
 # Main function
 def main():
-    """
-    Main function to run the Streamlit app.
-    """
-    st.title("Downtime Prediction 🏭")
+    add_title_animation()
+    add_text_animation()
     st.sidebar.title("File Upload and Database Credentials")
 
-    # Add animated text
-    add_text_animation()
-
-    # Add gear animation
-    add_gear_animation()
-
-    # File uploader
     uploaded_file = st.sidebar.file_uploader("Choose a file", type=['csv', 'xlsx'], accept_multiple_files=False)
-
-    # Database credentials input
     user = st.sidebar.text_input("Username", "")
     pw = st.sidebar.text_input("Password", type='password', value="")
     db = st.sidebar.text_input("Database Name", "")
 
     if uploaded_file is not None:
         try:
-            if uploaded_file.name.endswith('.csv'):
-                data = pd.read_csv(uploaded_file)
-            else:
-                data = pd.read_excel(uploaded_file)
-
+            data = pd.read_csv(uploaded_file) if uploaded_file.name.endswith('.csv') else pd.read_excel(uploaded_file)
             st.write("Data preview:")
             st.dataframe(data.head())
-
             if st.button("Predict Downtime 🚀"):
                 result, message = predict(data, user, pw, db)
                 if not result.empty:
