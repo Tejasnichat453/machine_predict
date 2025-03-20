@@ -48,9 +48,9 @@ def add_text_animation():
         }}
     }}
     .animated-text {{
-        font-size: 2.5em;
+        font-size: 3.5em;
         font-weight: bold;
-        color: #FFFFFF;
+        color: #951b0a;
         animation: slide-fade-in 2s ease-in-out;
         text-shadow: 2px 2px 4px #000000;
     }}
