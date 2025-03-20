@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 import pickle, joblib
 import pymysql
 import base64
+import time
 
 # Load the saved model and preprocessor
 model = pickle.load(open('rfc.pkl', 'rb'))
@@ -12,7 +13,7 @@ preprocessor = joblib.load('preprocessor.sav')  # Load the preprocessor
 # Function to encode local image to base64
 def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode()  # Fixed encoding function
+        return base64.b64encode(image_file.read()).decode()
 
 # Set background image using a local file
 def set_background_image(image_path):
@@ -51,6 +52,7 @@ def add_text_animation():
         font-weight: bold;
         color: #FFFFFF;
         animation: slide-fade-in 2s ease-in-out;
+        text-shadow: 2px 2px 4px #000000;
     }}
     </style>
 
@@ -60,6 +62,38 @@ def add_text_animation():
     '''
     st.markdown(animated_text, unsafe_allow_html=True)
 
+# Add a spinning gear animation
+def add_gear_animation():
+    gear_animation = '''
+    <style>
+    @keyframes spin {{
+        0% {{
+            transform: rotate(0deg);
+        }}
+        100% {{
+            transform: rotate(360deg);
+        }}
+    }}
+    .gear {{
+        display: inline-block;
+        font-size: 3em;
+        animation: spin 2s linear infinite;
+        color: #FF5733;
+    }}
+    </style>
+
+    <div class="gear">
+        ⚙️
+    </div>
+    '''
+    st.markdown(gear_animation, unsafe_allow_html=True)
+
+# Add a loading spinner
+def show_loading_spinner():
+    with st.spinner("Predicting downtime... Please wait ⏳"):
+        time.sleep(2)  # Simulate a delay for prediction
+
+# Preprocess data
 def preprocess_data(data):
     """
     Preprocess the input data using the saved preprocessor.
@@ -71,6 +105,7 @@ def preprocess_data(data):
     processed_data = preprocessor.transform(data)
     return processed_data
 
+# Predict downtime
 def predict(data, user=None, pw=None, db=None):
     """
     Predict downtime based on the input data and optionally save results to a MySQL database.
@@ -78,6 +113,9 @@ def predict(data, user=None, pw=None, db=None):
     try:
         # Preprocess the data
         processed_data = preprocess_data(data)
+
+        # Show loading spinner
+        show_loading_spinner()
 
         # Predict using the model
         predictions = pd.DataFrame(model.predict(processed_data), columns=['Downtime'])
@@ -99,15 +137,19 @@ def predict(data, user=None, pw=None, db=None):
         st.error(f"An error occurred: {e}")
         return pd.DataFrame(), "Error occurred during processing."
 
+# Main function
 def main():
     """
     Main function to run the Streamlit app.
     """
-    st.title("Downtime Prediction")
+    st.title("Downtime Prediction 🏭")
     st.sidebar.title("File Upload and Database Credentials")
 
     # Add animated text
     add_text_animation()
+
+    # Add gear animation
+    add_gear_animation()
 
     # File uploader
     uploaded_file = st.sidebar.file_uploader("Choose a file", type=['csv', 'xlsx'], accept_multiple_files=False)
@@ -127,10 +169,11 @@ def main():
             st.write("Data preview:")
             st.dataframe(data.head())
 
-            if st.button("Predict"):
+            if st.button("Predict Downtime 🚀"):
                 result, message = predict(data, user, pw, db)
                 if not result.empty:
-                    st.write(message)
+                    st.success(message)
+                    st.write("Predictions:")
                     st.dataframe(result)
                 else:
                     st.warning(message)
