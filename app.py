@@ -36,20 +36,19 @@ set_background_image('new image.jpg')  # Update this line with the correct file 
 def add_title_animation():
     title_html = '''
     <style>
-    @keyframes glow {
-        0% { text-shadow: 0 0 5px #FF5733, 0 0 10px #FF5733; }
-        50% { text-shadow: 0 0 20px #FFBD33, 0 0 30px #FFBD33; }
-        100% { text-shadow: 0 0 5px #FF5733, 0 0 10px #FF5733; }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
     .title-text {
         font-size: 3.5em;
         font-weight: bold;
         text-align: center;
-        color: #FFBD33;
-        animation: glow 2s infinite alternate;
+        color: #FFA500;
+        animation: fadeIn 2s ease-in-out;
     }
     </style>
-    <div class="title-text">Downtime Prediction</div>
+    <div class="title-text">Downtime Prediction 🏭</div>
     '''
     st.markdown(title_html, unsafe_allow_html=True)
 
@@ -57,25 +56,24 @@ def add_title_animation():
 def add_text_animation():
     animated_text = '''
     <style>
-    @keyframes slide-fade-in {
-        0% { opacity: 0; transform: translateX(-100%); }
-        100% { opacity: 1; transform: translateX(0); }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
     }
     .welcome-text {
         font-size: 2.5em;
         font-weight: bold;
-        color: #FFBD33;
-        animation: slide-fade-in 2s ease-in-out;
-        text-shadow: 2px 2px 4px #000000;
+        color: #FFD700;
+        animation: bounce 2s infinite;
     }
     </style>
-    <div class="welcome-text">Welcome to the <span style="color:#FF5733;">Downtime Prediction</span> App!</div>
+    <div class="welcome-text">Welcome to the <span style="color:#FF4500;">Downtime Prediction</span></div>
     '''
     st.markdown(animated_text, unsafe_allow_html=True)
 
 # Add a loading spinner
 def show_loading_spinner():
-    with st.spinner("Predicting downtime... Please wait ⏳"):
+    with st.spinner("Predicting Downtime... Please wait ⏳"):
         time.sleep(2)  # Simulate a delay for prediction
 
 # Preprocess data
@@ -117,7 +115,7 @@ def main():
             data = pd.read_csv(uploaded_file) if uploaded_file.name.endswith('.csv') else pd.read_excel(uploaded_file)
             st.write("Data preview:")
             st.dataframe(data.head())
-            if st.button("Predict Downtime 🚀"):
+            if st.button("Predict Downtime "):
                 result, message = predict(data, user, pw, db)
                 if not result.empty:
                     st.success(message)
