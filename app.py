@@ -31,7 +31,7 @@ def set_background_image(image_path):
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Set your local image path here
-set_background_image('new image.jpg')
+set_background_image('new_image.jpg')  # Update this line with the correct file name
 
 # Add animated text
 def add_text_animation():
@@ -47,17 +47,38 @@ def add_text_animation():
             transform: translateX(0);
         }}
     }}
-    .animated-text {{
-        font-size: 3.5em;
+    @keyframes pulse {{
+        0% {{
+            transform: scale(1);
+            opacity: 1;
+        }}
+        50% {{
+            transform: scale(1.1);
+            opacity: 0.7;
+        }}
+        100% {{
+            transform: scale(1);
+            opacity: 1;
+        }}
+    }}
+    .welcome-text {{
+        font-size: 3.5em;  /* Increased font size */
         font-weight: bold;
-        color: #951b0a;
+        color: #FFFFFF;
         animation: slide-fade-in 2s ease-in-out;
+        text-shadow: 2px 2px 4px #000000;
+    }}
+    .downtime-text {{
+        font-size: 3.5em;  /* Increased font size */
+        font-weight: bold;
+        color: #FF5733;  /* Changed color to orange */
+        animation: pulse 2s infinite;
         text-shadow: 2px 2px 4px #000000;
     }}
     </style>
 
-    <div class="animated-text">
-        Welcome to Downtime Prediction App!
+    <div class="welcome-text">
+        Welcome to <span class="downtime-text">Downtime Prediction</span> App!
     </div>
     '''
     st.markdown(animated_text, unsafe_allow_html=True)
